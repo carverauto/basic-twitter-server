@@ -1,3 +1,18 @@
+const admin = require('firebase-admin')
+const { initializeApp } = require('firebase-admin/app');
+const { v4: uuidv4 } = require('uuid')
+
+const serviceAccount = require("/Users/mfreeman/chaseapp-SVC-acct.json");
+
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    databaseURL: "https://chaseapp-8459b.firebaseio.com"
+});
+
+// firebase firestore
+const db = admin.firestore()
+const firehoseRef = db.collection('firehose')
+
 // Open a realtime stream of Tweets, filtered according to rules
 // https://developer.twitter.com/en/docs/twitter-api/tweets/filtered-stream/quick-start
 
@@ -28,7 +43,7 @@ const rules = [
         'tag': 'PCAlive'
     },
     {
-        'value': 'from:LACoScanner #Pursuit (#KCAL9 or @CBSLA) -is:retweet',
+        'value': 'from:LACoScanner #Pursuit (#KCAL9 OR @CBSLA) -is:retweet',
         'tag': 'LACoScanner'
     },
     {
@@ -40,8 +55,16 @@ const rules = [
         'tag': 'CBSLA'
     },
     {
-        'value': 'from:ABC7 #LIVE (CHP or LASD or LAPD) has:links -is:retweet',
+        'value': 'from:ABC7 #LIVE (CHP OR LASD OR LAPD) has:links -is:retweet',
         'tag': 'ABC7'
+    },
+    {
+        'value': 'from:MikeRogersTV (#BREAKING OR #PURSUIT) pursuit has:links url:"cbsloc.al"',
+        'tag': 'MikeRogersTV'
+    },
+    {
+        'value': 'from:mfreeman451 #TEST live (pursuit OR chase) has:links -is:retweet',
+        'tag': 'mfreeman451'
     }
 ];
 
@@ -54,7 +77,6 @@ async function getAllRules() {
     })
 
     if (response.statusCode !== 200) {
-        console.log("Error:", response.statusMessage, response.statusCode)
         throw new Error(response.body);
     }
 
@@ -104,6 +126,7 @@ async function setRules() {
     })
 
     if (response.statusCode !== 201) {
+        console.log(response.body.errors)
         throw new Error(response.body);
     }
 
@@ -125,6 +148,15 @@ function streamConnect(retryAttempt) {
         try {
             const json = JSON.parse(data);
             console.log(json);
+            firehoseRef.doc(uuidv4()).set({
+                createdAt: Date.now(),
+                eventType: 'twitter',
+                payload: json.data
+            }).then(() => {
+                console.log('wrote to firestore')
+            }).catch((err) => {
+                console.error(`Error writing document: ${err}`)
+            })
             // A successful connection resets retry count.
             retryAttempt = 0;
         } catch (e) {
