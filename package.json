@@ -9,6 +9,7 @@
   "author": "Michael Freeman",
   "license": "MIT",
   "dependencies": {
+    "express": "^4.17.2",
     "firebase": "^9.6.6",
     "firebase-admin": "^10.0.2",
     "needle": "^3.0.0",
