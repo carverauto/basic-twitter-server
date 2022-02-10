@@ -9,6 +9,10 @@ listens for our tweets and writes them to firestore
 
 Make sure you insert the twitter BEARER_TOKEN below
 
+```
+npm install
+```
+
 
 ```
  docker build . --build-arg BEARER_TOKEN=TOKEN -t nodejs-twitter
