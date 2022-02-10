@@ -7,9 +7,9 @@ const app = express()
 const port = process.env.PORT || 8080;
 
 // Not needed when we run in google cloud
-// const serviceAccount = require("./chaseapp-SVC-acct.json");
-// admin.initializeApp({ credential: admin.credential.cert(serviceAccount), databaseURL: "https://chaseapp-8459b.firebaseio.com" });
-admin.initializeApp()
+const serviceAccount = require("./chaseapp-SVC-acct.json");
+admin.initializeApp({ credential: admin.credential.cert(serviceAccount), databaseURL: "https://chaseapp-8459b.firebaseio.com" });
+// admin.initializeApp()
 
 // firebase firestore
 const db = admin.firestore()
