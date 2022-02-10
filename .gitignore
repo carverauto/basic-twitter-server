@@ -105,3 +105,4 @@ dist
 
 # google service account
 chaseapp-SVC-acct.json
+Dockerfile
