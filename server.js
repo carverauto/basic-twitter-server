@@ -1,19 +1,14 @@
-const admin = require('firebase-admin')
-const { v4: uuidv4 } = require('uuid')
-const express = require('express');
+const express = require('express')
+const { connect } = require('getstream')
+
+// getstream 'firehose' activity feed integration
+const api_key = process.env.API_KEY
+const api_secret = process.env.API_SECRET
+const client = connect(api_key, api_secret)
 
 const app = express()
 
 const port = process.env.PORT || 8080;
-
-// Not needed when we run in google cloud
-const serviceAccount = require("./chaseapp-SVC-acct.json");
-admin.initializeApp({ credential: admin.credential.cert(serviceAccount), databaseURL: "https://chaseapp-8459b.firebaseio.com" });
-// admin.initializeApp()
-
-// firebase firestore
-const db = admin.firestore()
-const firehoseRef = db.collection('firehose')
 
 // Open a realtime stream of Tweets, filtered according to rules
 // https://developer.twitter.com/en/docs/twitter-api/tweets/filtered-stream/quick-start
@@ -23,15 +18,15 @@ const needle = require('needle');
 // The code below sets the bearer token from your environment variables
 // To set environment variables on macOS or Linux, run the export command below from the terminal:
 // export BEARER_TOKEN='YOUR-TOKEN'
-const token = process.env.BEARER_TOKEN;
+const token = process.env.BEARER_TOKEN
 
 if (!token) {
     console.log(`Missing token: ${token}`)
     return
 }
 
-const rulesURL = 'https://api.twitter.com/2/tweets/search/stream/rules';
-const streamURL = 'https://api.twitter.com/2/tweets/search/stream';
+const rulesURL = 'https://api.twitter.com/2/tweets/search/stream/rules'
+const streamURL = 'https://api.twitter.com/2/tweets/search/stream'
 
 // this sets up two rules - the value is the search terms to match on, and the tag is an identifier that
 // will be applied to the Tweets return to show which rule they matched
@@ -67,7 +62,12 @@ const rules = [
     {
         'value': 'from:mfreeman451 #TEST live (pursuit OR chase) has:links -is:retweet',
         'tag': 'mfreeman451'
+    },
+    {
+        'value': 'from:Patharveynews #pursuit has:links -isretweet',
+        'tag': 'Patharveynews'
     }
+
 ];
 
 async function getAllRules() {
@@ -149,7 +149,23 @@ function streamConnect(retryAttempt) {
     stream.on('data', data => {
         try {
             const json = JSON.parse(data);
-            console.log(json);
+            // TODO: do we need to get and pass a token?
+            const firehose = client.feed('firehose', 'twitter-server')
+            let activity = {
+                actor: 'twitter-bot',
+                verb: "event",
+                object: "twitter-message",
+                time: Date.now().toString(),
+                createdAt: Date.now(),
+                eventType: 'twitter',
+                payload: json.data
+            }
+            firehose.addActivity(activity).then((add) => {
+                console.log(add.id)
+            }).catch((e) => {
+                console.error(e)
+            })
+            /*
             firehoseRef.doc(uuidv4()).set({
                 createdAt: Date.now(),
                 eventType: 'twitter',
@@ -159,6 +175,7 @@ function streamConnect(retryAttempt) {
             }).catch((err) => {
                 console.error(`Error writing document: ${err}`)
             })
+             */
             // A successful connection resets retry count.
             retryAttempt = 0;
         } catch (e) {
