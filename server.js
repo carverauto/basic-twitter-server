@@ -154,7 +154,7 @@ function streamConnect(retryAttempt) {
 
     stream.on('data', async data => {
         try {
-            console.log('Streaming twitters..')
+            console.log(`${Date.now()} - Streaming twitters..`)
             const json = JSON.parse(data);
             if (json.data) {
                 client.user("twitter-server").getOrCreate({
@@ -175,8 +175,7 @@ function streamConnect(retryAttempt) {
                         payload: json.data,
                     }
                     firehose.addActivity(activity).then((add) => {
-                        console.log('Added activity')
-                        console.log(add.id)
+                        console.log(`Added activity ${add.id}`)
                     }).catch((e) => {
                         console.error(e)
                     })
