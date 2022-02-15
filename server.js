@@ -1,19 +1,20 @@
-const admin = require('firebase-admin')
-const { v4: uuidv4 } = require('uuid')
-const express = require('express');
+const express = require('express')
+const { connect } = require('getstream')
+
+// getstream 'firehose' activity feed integration
+const api_key = process.env.API_KEY
+const api_secret = process.env.API_SECRET
+
+if (!api_key || !api_secret) {
+    console.log('Missing env variables')
+    return
+}
+
+const client = connect(api_key, api_secret, '102359')
 
 const app = express()
 
 const port = process.env.PORT || 8080;
-
-// Not needed when we run in google cloud
-const serviceAccount = require("./chaseapp-SVC-acct.json");
-admin.initializeApp({ credential: admin.credential.cert(serviceAccount), databaseURL: "https://chaseapp-8459b.firebaseio.com" });
-// admin.initializeApp()
-
-// firebase firestore
-const db = admin.firestore()
-const firehoseRef = db.collection('firehose')
 
 // Open a realtime stream of Tweets, filtered according to rules
 // https://developer.twitter.com/en/docs/twitter-api/tweets/filtered-stream/quick-start
@@ -23,15 +24,15 @@ const needle = require('needle');
 // The code below sets the bearer token from your environment variables
 // To set environment variables on macOS or Linux, run the export command below from the terminal:
 // export BEARER_TOKEN='YOUR-TOKEN'
-const token = process.env.BEARER_TOKEN;
+const token = process.env.BEARER_TOKEN
 
 if (!token) {
     console.log(`Missing token: ${token}`)
     return
 }
 
-const rulesURL = 'https://api.twitter.com/2/tweets/search/stream/rules';
-const streamURL = 'https://api.twitter.com/2/tweets/search/stream';
+const rulesURL = 'https://api.twitter.com/2/tweets/search/stream/rules'
+const streamURL = 'https://api.twitter.com/2/tweets/search/stream'
 
 // this sets up two rules - the value is the search terms to match on, and the tag is an identifier that
 // will be applied to the Tweets return to show which rule they matched
@@ -67,7 +68,12 @@ const rules = [
     {
         'value': 'from:mfreeman451 #TEST live (pursuit OR chase) has:links -is:retweet',
         'tag': 'mfreeman451'
+    },
+    {
+        'value': 'from:Patharveynews #pursuit has:links -isretweet',
+        'tag': 'Patharveynews'
     }
+
 ];
 
 async function getAllRules() {
@@ -146,20 +152,37 @@ function streamConnect(retryAttempt) {
         timeout: 20000
     });
 
-    stream.on('data', data => {
+    stream.on('data', async data => {
         try {
+            console.log(`${Date.now()} - Streaming twitters..`)
             const json = JSON.parse(data);
-            console.log(json);
-            firehoseRef.doc(uuidv4()).set({
-                createdAt: Date.now(),
-                eventType: 'twitter',
-                payload: json.data
-            }).then(() => {
-                console.log('wrote to firestore')
-            }).catch((err) => {
-                console.error(`Error writing document: ${err}`)
-            })
-            // A successful connection resets retry count.
+            if (json.data) {
+                client.user("twitter-server").getOrCreate({
+                    name: "Twitter bot",
+                    occupation: "Running the firehose",
+                    gender: 'male'
+                }).then((user) => {
+                    const firehose = client.feed('events', 'firehose')
+
+                    const activity = {
+                        // actor needs to be a real user in the system..
+                        actor: 'twitter-server',
+                        verb: "event",
+                        object: "twitter-message",
+                        time: Date.now(),
+                        created_at: Date.now(),
+                        eventType: 'twitter',
+                        payload: json.data,
+                    }
+                    firehose.addActivity(activity).then((add) => {
+                        console.log(`Added activity ${add.id}`)
+                    }).catch((e) => {
+                        console.error(e)
+                    })
+                } ).catch((error) => {
+                    console.error(error)
+                })
+            }
             retryAttempt = 0;
         } catch (e) {
             if (data.detail === "This stream is currently at the maximum allowed connection limit.") {

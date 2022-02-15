@@ -12,6 +12,7 @@
     "express": "^4.17.2",
     "firebase": "^9.6.6",
     "firebase-admin": "^10.0.2",
+    "getstream": "^8.0.0",
     "needle": "^3.0.0",
     "uuid": "^8.3.2"
   }
