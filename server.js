@@ -4,7 +4,13 @@ const { connect } = require('getstream')
 // getstream 'firehose' activity feed integration
 const api_key = process.env.API_KEY
 const api_secret = process.env.API_SECRET
-const client = connect(api_key, api_secret)
+
+if (!api_key || !api_secret) {
+    console.log('Missing env variables')
+    return
+}
+
+const client = connect(api_key, api_secret, '102359')
 
 const app = express()
 
@@ -146,37 +152,38 @@ function streamConnect(retryAttempt) {
         timeout: 20000
     });
 
-    stream.on('data', data => {
+    stream.on('data', async data => {
         try {
+            console.log('Streaming twitters..')
             const json = JSON.parse(data);
-            // TODO: do we need to get and pass a token?
-            const firehose = client.feed('firehose', 'twitter-server')
-            let activity = {
-                actor: 'twitter-bot',
-                verb: "event",
-                object: "twitter-message",
-                time: Date.now().toString(),
-                createdAt: Date.now(),
-                eventType: 'twitter',
-                payload: json.data
+            if (json.data) {
+                client.user("twitter-server").getOrCreate({
+                    name: "Twitter bot",
+                    occupation: "Running the firehose",
+                    gender: 'male'
+                }).then((user) => {
+                    const firehose = client.feed('events', 'firehose')
+
+                    const activity = {
+                        // actor needs to be a real user in the system..
+                        actor: 'twitter-server',
+                        verb: "event",
+                        object: "twitter-message",
+                        time: Date.now(),
+                        created_at: Date.now(),
+                        eventType: 'twitter',
+                        payload: json.data,
+                    }
+                    firehose.addActivity(activity).then((add) => {
+                        console.log('Added activity')
+                        console.log(add.id)
+                    }).catch((e) => {
+                        console.error(e)
+                    })
+                } ).catch((error) => {
+                    console.error(error)
+                })
             }
-            firehose.addActivity(activity).then((add) => {
-                console.log(add.id)
-            }).catch((e) => {
-                console.error(e)
-            })
-            /*
-            firehoseRef.doc(uuidv4()).set({
-                createdAt: Date.now(),
-                eventType: 'twitter',
-                payload: json.data
-            }).then(() => {
-                console.log('wrote to firestore')
-            }).catch((err) => {
-                console.error(`Error writing document: ${err}`)
-            })
-             */
-            // A successful connection resets retry count.
             retryAttempt = 0;
         } catch (e) {
             if (data.detail === "This stream is currently at the maximum allowed connection limit.") {
