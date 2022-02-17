@@ -1,6 +1,7 @@
 const express = require('express')
 const { connect } = require('getstream')
 const Pusher = require("pusher")
+import 'dotenv/config'
 
 // pusher
 const pusher = new Pusher({
