@@ -14,6 +14,7 @@
     "firebase-admin": "^10.0.2",
     "getstream": "^8.0.0",
     "needle": "^3.0.0",
+    "pusher": "^5.0.1",
     "uuid": "^8.3.2"
   }
 }

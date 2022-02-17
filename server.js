@@ -1,5 +1,14 @@
 const express = require('express')
 const { connect } = require('getstream')
+const Pusher = require("pusher")
+
+// pusher
+const pusher = new Pusher({
+    appId: process.env.PUSHER_API_APPID,
+    key: process.env.PUSHER_API_KEY,
+    secret: process.env.PUSHER_API_SECRET,
+    cluster: process.env.PUSHER_API_CLUSTER, // if `host` is present, it will override the `cluster` option.
+})
 
 // getstream 'firehose' activity feed integration
 const api_key = process.env.API_KEY
@@ -175,6 +184,7 @@ function streamConnect(retryAttempt) {
                         payload: json.data,
                     }
                     firehose.addActivity(activity).then((add) => {
+                        pusher.trigger("firehose", "updates", json.data)
                         console.log(`Added activity ${add.id}`)
                     }).catch((e) => {
                         console.error(e)
