@@ -23,6 +23,15 @@ npm install
 ```
 docker run -d nodejs-twitter
 ```
+### Container management
+
+It seems this nodejs stuff likes to crash after a while so, we'll help it out:
+
+Crontab:
+
+```
+0 */6 * * *	docker restart nodejs-twitter
+```
 
 ## API
 
