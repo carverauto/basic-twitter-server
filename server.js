@@ -250,7 +250,11 @@ function streamConnect(retryAttempt) {
 
     app.get('/metrics', (req, res) => {
         res.set('Content-Type', Prometheus.register.contentType)
-        res.end(Prometheus.register.metrics())
+        Prometheus.register.metrics().then((data) => {
+            console.log(data)
+            res.send(data)
+        })
+        // res.end(Prometheus.register.metrics())
     })
 
     app.listen(port, () => console.log(`twitter server running on port ${port}`))
