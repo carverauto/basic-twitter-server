@@ -4,12 +4,10 @@ const Pusher = require("pusher")
 require('dotenv').config()
 
 // prometheus stuff
-const client = require('prom-client')
-const collectDefaultMetrics = client.collectDefaultMetrics
+const Prometheus = require('prom-client')
+const collectDefaultMetrics = Prometheus.collectDefaultMetrics
 // Probe every 5th second.
 collectDefaultMetrics({ timeout: 5000 })
-
-const Prometheus = require('prom-client')
 const metricsInterval = Prometheus.collectDefaultMetrics()
 
 // pusher
