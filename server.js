@@ -1,5 +1,24 @@
 const express = require('express')
 const { connect } = require('getstream')
+const Pusher = require("pusher")
+require('dotenv').config()
+
+// prometheus stuff
+const client = require('prom-client')
+const collectDefaultMetrics = client.collectDefaultMetrics
+// Probe every 5th second.
+collectDefaultMetrics({ timeout: 5000 })
+
+const Prometheus = require('prom-client')
+const metricsInterval = Prometheus.collectDefaultMetrics()
+
+// pusher
+const pusher = new Pusher({
+    appId: process.env.PUSHER_API_APPID,
+    key: process.env.PUSHER_API_KEY,
+    secret: process.env.PUSHER_API_SECRET,
+    cluster: process.env.PUSHER_API_CLUSTER, // if `host` is present, it will override the `cluster` option.
+})
 
 // getstream 'firehose' activity feed integration
 const api_key = process.env.API_KEY
@@ -66,7 +85,7 @@ const rules = [
         'tag': 'MikeRogersTV'
     },
     {
-        'value': 'from:mfreeman451 #TEST live (pursuit OR chase) has:links -is:retweet',
+        'value': 'from:mfreeman451 #TEST -is:retweet',
         'tag': 'mfreeman451'
     },
     {
@@ -175,6 +194,7 @@ function streamConnect(retryAttempt) {
                         payload: json.data,
                     }
                     firehose.addActivity(activity).then((add) => {
+                        // pusher.trigger("firehose", "updates", json.data)
                         console.log(`Added activity ${add.id}`)
                     }).catch((e) => {
                         console.error(e)
@@ -233,8 +253,9 @@ function streamConnect(retryAttempt) {
     // Listen to the stream.
     streamConnect(0);
 
-    app.get('/', (req, res) => {
-        res.send('Hello World')
+    app.get('/metrics', (req, res) => {
+        res.set('Content-Type', Prometheus.register.contentType)
+        res.end(Prometheus.register.metrics())
     })
 
     app.listen(port, () => console.log(`twitter server running on port ${port}`))
