@@ -21,8 +21,9 @@ npm install
 ### Running docker
 
 ```
-docker run -d nodejs-twitter
+docker run -d -p 8080:8080 nodejs-twitter
 ```
+
 ### Container management
 
 It seems this nodejs stuff likes to crash after a while so, we'll help it out:
