@@ -80,7 +80,7 @@ const rules = [
         'tag': 'MikeRogersTV'
     },
     {
-        'value': 'from:mfreeman451 #TEST -is:retweet',
+        'value': 'from:mfreeman451 #Firehose -is:retweet',
         'tag': 'mfreeman451'
     },
     {
@@ -251,7 +251,6 @@ function streamConnect(retryAttempt) {
     app.get('/metrics', (req, res) => {
         res.set('Content-Type', Prometheus.register.contentType)
         Prometheus.register.metrics().then((data) => {
-            console.log(data)
             res.send(data)
         })
         // res.end(Prometheus.register.metrics())
