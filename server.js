@@ -188,8 +188,9 @@ function streamConnect(retryAttempt) {
                         eventType: 'twitter',
                         payload: json.data,
                     }
+                    console.log(activity)
                     firehose.addActivity(activity).then((add) => {
-                        // pusher.trigger("firehose", "updates", json.data)
+                        pusher.trigger("firehose", "updates", activity)
                         console.log(`Added activity ${add.id}`)
                     }).catch((e) => {
                         console.error(e)
