@@ -7,6 +7,9 @@ require('dotenv').config()
 const Prometheus = require('prom-client')
 const metricsInterval = Prometheus.collectDefaultMetrics()
 
+// axios
+const axios = require('axios').default
+
 // pusher
 const pusher = new Pusher({
     appId: process.env.PUSHER_API_APPID,
@@ -176,25 +179,42 @@ function streamConnect(retryAttempt) {
                     occupation: "Running the firehose",
                     gender: 'male'
                 }).then((user) => {
-                    const firehose = client.feed('events', 'firehose')
-
-                    const activity = {
-                        // actor needs to be a real user in the system..
-                        actor: 'twitter-server',
-                        verb: "event",
-                        object: "twitter-message",
-                        time: Date.now(),
-                        created_at: Date.now(),
-                        eventType: 'twitter',
-                        payload: json.data,
-                    }
-                    console.log(activity)
-                    firehose.addActivity(activity).then((add) => {
-                        pusher.trigger("firehose", "updates", activity)
-                        console.log(`Added activity ${add.id}`)
-                    }).catch((e) => {
-                        console.error(e)
-                    })
+                    // use axios to get some more information about who sent the tweet
+                    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
+                    axios.get('https://api.twitter.com/2/tweets?ids=' + json.data.id + '&tweet.fields=created_at&expansions=author_id&user.fields=created_at')
+                        .then((res) => {
+                        // console.log(res.data.includes.users)
+                        axios.get('https://api.twitter.com/2/users/by?usernames=' + res.data.includes.users[0].username + '&user.fields=created_at,profile_image_url&expansions=pinned_tweet_id&tweet.fields=author_id,created_at' )
+                            .then((secondRes) => {
+                                console.log('secondsR')
+                                console.log(secondRes.data.data[0].profile_image_url)
+                                json.data.username = secondRes.data.data[0].username
+                                json.data.image_url = secondRes.data.data[0].profile_image_url
+                                console.log('Adding activity')
+                                const firehose = client.feed('events', 'firehose')
+                                const activity = {
+                                    // actor needs to be a real user in the system..
+                                    actor: 'twitter-server',
+                                    verb: "event",
+                                    object: "twitter-message",
+                                    time: Date.now(),
+                                    created_at: Date.now(),
+                                    eventType: 'twitter',
+                                    payload: json.data,
+                                }
+                                console.log(activity)
+                                firehose.addActivity(activity).then((add) => {
+                                    pusher.trigger("firehose", "updates", activity)
+                                    console.log(`Added activity ${add.id}`)
+                                }).catch((e) => {
+                                    console.error(e)
+                                })
+                            }).catch((e) => {
+                                console.error(e)
+                            })
+                        }).catch((e) => {
+                            console.log(e)
+                        })
                 } ).catch((error) => {
                     console.error(error)
                 })
