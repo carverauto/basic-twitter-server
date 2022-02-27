@@ -186,8 +186,8 @@ function streamConnect(retryAttempt) {
                         // console.log(res.data.includes.users)
                         axios.get('https://api.twitter.com/2/users/by?usernames=' + res.data.includes.users[0].username + '&user.fields=created_at,profile_image_url&expansions=pinned_tweet_id&tweet.fields=author_id,created_at' )
                             .then((secondRes) => {
-                                console.log('secondsR')
                                 console.log(secondRes.data.data[0].profile_image_url)
+                                json.data.name = secondRes.data.data[0].name
                                 json.data.username = secondRes.data.data[0].username
                                 json.data.image_url = secondRes.data.data[0].profile_image_url
                                 console.log('Adding activity')
