@@ -93,6 +93,10 @@ const rules = [
     {
         'value': 'from:LAPolicePursuit #Pursuit has:links -isretweet',
         'tag': 'LAPolicePursuit'
+    },
+    {
+        'value': 'from:Stu_Mendel #SkyFox has:links -isretweet',
+        'tag': 'Stu_Mendel_SkyFox'
     }
 ];
 
