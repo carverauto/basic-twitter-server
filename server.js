@@ -89,8 +89,11 @@ const rules = [
     {
         'value': 'from:Patharveynews #pursuit has:links -isretweet',
         'tag': 'Patharveynews'
+    },
+    {
+        'value': 'from:LAPolicePursuit #Pursuit has:links -isretweet',
+        'tag': 'LAPolicePursuit'
     }
-
 ];
 
 async function getAllRules() {
