@@ -176,6 +176,13 @@ function streamConnect(retryAttempt) {
         timeout: 20000
     });
 
+    stream.on('done', (err) => {
+        if (err) {
+            console.log('An error occurred: ' + err.message)
+            process.exit(0)
+        }
+    })
+
     stream.on('data', async data => {
         try {
             console.log(`${Date.now()} - Streaming twitters..`)
