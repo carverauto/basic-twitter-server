@@ -248,7 +248,7 @@ function streamConnect(retryAttempt) {
                                     pusher.trigger("firehose", "updates", activity)
                                     console.log(`Added activity ${add.id}`)
                                     // Send out Pusher Beams Notification
-                                    pushNotifications.publishToInterests(['hello'], {
+                                    pushNotifications.publishToInterests(['firehose'], {
                                         apns: {
                                             aps: {
                                                 alert: 'Firehose - new tweet received from ' + res.data.includes.users[0].username
