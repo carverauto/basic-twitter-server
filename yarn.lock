@@ -517,6 +517,13 @@
   "resolved" "https://registry.npmjs.org/@protobufjs/utf8/-/utf8-1.1.0.tgz"
   "version" "1.1.0"
 
+"@pusher/push-notifications-server@^1.2.4":
+  "integrity" "sha512-hMuwVHkeTYoLb6QNvGWOTehe/IsnG8zT2nIR9bWPuJ2t4rt4xMl5TGcglDLnH14Hd8LlBmvuvgAh1q/gnP19BQ=="
+  "resolved" "https://registry.npmjs.org/@pusher/push-notifications-server/-/push-notifications-server-1.2.4.tgz"
+  "version" "1.2.4"
+  dependencies:
+    "jsonwebtoken" "^8.4.0"
+
 "@tootallnate/once@2":
   "integrity" "sha512-XCuKFP5PS55gnMVu3dty8KPatLqUoy/ZYzDzAGCQ8JNFCkLXzmI7vNHCR+XpbZaMWQK/vQubr7PkYq8g470J/A=="
   "resolved" "https://registry.npmjs.org/@tootallnate/once/-/once-2.0.0.tgz"
@@ -1417,7 +1424,7 @@
   dependencies:
     "bignumber.js" "^9.0.0"
 
-"jsonwebtoken@^8.5.1":
+"jsonwebtoken@^8.4.0", "jsonwebtoken@^8.5.1":
   "integrity" "sha512-XjwVfRS6jTMsqYs0EsuJ4LGxXV14zQybNd4L2r0UvbVnSF9Af8x7p5MzbJ90Ioz/9TI41/hTCvznF/loiSzn8w=="
   "resolved" "https://registry.npmjs.org/jsonwebtoken/-/jsonwebtoken-8.5.1.tgz"
   "version" "8.5.1"

@@ -9,6 +9,7 @@
   "author": "Michael Freeman",
   "license": "MIT",
   "dependencies": {
+    "@pusher/push-notifications-server": "^1.2.4",
     "axios": "^0.26.0",
     "dotenv": "^16.0.0",
     "express": "^4.17.2",
