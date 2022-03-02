@@ -1,7 +1,14 @@
 const express = require('express')
+// Stream.io chat service
 const { connect } = require('getstream')
+// Pusher Channels
 const Pusher = require("pusher")
+// Pusher beams
+const PushNotifications = require('@pusher/push-notifications-server');
 require('dotenv').config()
+
+// Used as the image in the notification
+const imageURL = 'https://chaseapp.tv/Twitter_logo_blue_32.png'
 
 // prometheus stuff
 const Prometheus = require('prom-client')
@@ -10,13 +17,19 @@ const metricsInterval = Prometheus.collectDefaultMetrics()
 // axios
 const axios = require('axios').default
 
-// pusher
+// pusher channels
 const pusher = new Pusher({
     appId: process.env.PUSHER_API_APPID,
     key: process.env.PUSHER_API_KEY,
     secret: process.env.PUSHER_API_SECRET,
     cluster: process.env.PUSHER_API_CLUSTER, // if `host` is present, it will override the `cluster` option.
 })
+
+// pusher beams
+let pushNotifications = new PushNotifications({
+    instanceId: process.env.PUSHER_BEAMS_INSTANCE,
+    secretKey: process.env.PUSHER_BEAMS_KEY
+});
 
 // getstream 'firehose' activity feed integration
 const api_key = process.env.API_KEY
@@ -234,6 +247,32 @@ function streamConnect(retryAttempt) {
                                 firehose.addActivity(activity).then((add) => {
                                     pusher.trigger("firehose", "updates", activity)
                                     console.log(`Added activity ${add.id}`)
+                                    // Send out Pusher Beams Notification
+                                    pushNotifications.publishToInterests(['hello'], {
+                                        apns: {
+                                            aps: {
+                                                alert: 'Firehose - new tweet received from ' + res.data.includes.users[0].username
+                                            }
+                                        },
+                                        fcm: {
+                                            notification: {
+                                                title: 'ChaseApp - Firehose',
+                                                body: 'New tweet received from ' + res.data.includes.users[0].username,
+                                                imageurl: imageURL
+                                            }
+                                        },
+                                        web: {
+                                            notification: {
+                                                title: 'ChaseApp - Firehose',
+                                                body: 'New tweet received from ' + res.data.includes.users[0].username,
+                                                imageurl: imageURL
+                                            }
+                                        }
+                                    }).then((publishResponse) => {
+                                        console.log('Just published:', publishResponse.publishId);
+                                    }).catch((error) => {
+                                        console.log('Error:', error);
+                                    });
                                 }).catch((e) => {
                                     console.error(e)
                                 })
