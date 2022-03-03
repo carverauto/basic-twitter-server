@@ -7,7 +7,7 @@ listens for our tweets and writes them to a pusher channel
 
 Example Dockerfile
 
-```
+```docker
 FROM node:16
 
 ENV BEARER_TOKEN twitterBearerTokenGoesHere
