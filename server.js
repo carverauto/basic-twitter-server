@@ -189,39 +189,10 @@ function streamConnect(retryAttempt) {
         timeout: 20000
     });
 
-    stream.on('done', (err) => {
-        console.log('Stream terminating, bailing out..')
-
-        if (err) {
-            console.log('Stream has terminated, exiting..: ' + err.message)
-            process.exit(0)
-        }
-        process.exit(0)
-    })
-
-    stream.on('err', (err) => {
-        console.log('An error occurred, exiting..')
-        if (err) {
-            console.log('An error occurred, exiting: ' + err.message)
-            process.exit(0)
-        }
-        process.exit(0)
-    })
-
-    stream.on('timeout', (err) => {
-        console.log('A timeout occurred, exiting..')
-        if (err) {
-            console.log('A error occured during timeout, exiting: ' + err.message)
-            process.exit(0)
-        }
-
-        process.exit(0)
-    })
-
     stream.on('data', async data => {
         try {
             console.log(`${Date.now()} - Streaming twitters..`)
-            const json = JSON.parse(data);
+            const json = JSON.parse(await data);
             if (json.data) {
                 client.user("twitter-server").getOrCreate({
                     name: "Twitter bot",
@@ -316,10 +287,24 @@ function streamConnect(retryAttempt) {
                 streamConnect(++retryAttempt);
             }, 2 ** retryAttempt)
         }
-    });
+    }).on('done', (err) => {
+        console.log('Stream terminating, bailing out..')
+        if (err) {
+            console.log('Stream has terminated, exiting..: ' + err.message)
+            process.exit(0)
+        }
+        process.exit(0)
+    }).on('timeout', (err) => {
+        console.log('A timeout occurred, exiting..')
+        if (err) {
+            console.log('A error occured during timeout, exiting: ' + err.message)
+            process.exit(0)
+        }
+
+        process.exit(0)
+    })
 
     return stream;
-
 }
 
 
