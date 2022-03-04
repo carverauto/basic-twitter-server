@@ -311,7 +311,7 @@ function streamConnect(retryAttempt) {
             console.log('Stream has terminated, exiting..: ' + err.message)
             process.exit(0)
         }
-        process.exit(0)
+        // process.exit(0)
     }).on('timeout', (err) => {
         console.log('A timeout occurred, exiting..')
         if (err) {
