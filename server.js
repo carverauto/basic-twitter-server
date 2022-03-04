@@ -186,7 +186,7 @@ function streamConnect(retryAttempt) {
             "User-Agent": "v2FilterStreamJS",
             "Authorization": `Bearer ${token}`
         },
-        timeout: 20000
+        timeout: 20000 // TODO: maybe change this?
     });
 
     stream.on('data', async data => {
@@ -227,7 +227,7 @@ function streamConnect(retryAttempt) {
                                     pusher.trigger("firehose", "updates", activity)
                                     console.log(`Added activity ${add.id}`)
                                     // Send out Pusher Beams Notification
-                                    pushNotifications.publishToInterests(['firehose'], {
+                                    pushNotifications.publishToInterests(['firehose-notifications'], {
                                         apns: {
                                             aps: {
                                                 alert: 'Firehose - new tweet received from ' + res.data.includes.users[0].username
@@ -249,6 +249,21 @@ function streamConnect(retryAttempt) {
                                         }
                                     }).then((publishResponse) => {
                                         console.log('Just published:', publishResponse.publishId);
+                                        const myData = {
+                                            body: "New tweet received from " + res.data.includes.users[0].username,
+                                            createdAt: Date.now(),
+                                            interest: 'firehose-notifications',
+                                            title: 'twitter',
+                                            data: {
+                                                tweet_id: json.data.id,
+                                                image: imageURL,
+                                            }
+                                        }
+                                        axios.post('https://us-central1-chaseapp-8459b.cloudfunctions.net/UpdateNotifications', myData).then((res) => {
+                                            if (res.status === '200') {
+                                                console.log('Success')
+                                            }
+                                        })
                                     }).catch((error) => {
                                         console.log('Error:', error);
                                     });
