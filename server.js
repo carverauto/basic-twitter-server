@@ -259,10 +259,13 @@ function streamConnect(retryAttempt) {
                                                 image: imageURL,
                                             }
                                         }
+                                        console.log(myData)
                                         axios.post('https://us-central1-chaseapp-8459b.cloudfunctions.net/UpdateNotifications', myData).then((res) => {
                                             if (res.status === '200') {
                                                 console.log('Success')
                                             }
+                                        }).catch((e) => {
+                                            console.error(e)
                                         })
                                     }).catch((error) => {
                                         console.log('Error:', error);
