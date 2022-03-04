@@ -223,6 +223,7 @@ function streamConnect(retryAttempt) {
                                     payload: json.data,
                                 }
                                 console.log(activity)
+                                var d = new Date(); var n = d.toDateString();
                                 firehose.addActivity(activity).then((add) => {
                                     pusher.trigger("firehose", "updates", activity)
                                     console.log(`Added activity ${add.id}`)
@@ -251,7 +252,7 @@ function streamConnect(retryAttempt) {
                                         console.log('Just published:', publishResponse.publishId);
                                         const myData = {
                                             body: "New tweet received from " + res.data.includes.users[0].username,
-                                            createdAt: Date.now(),
+                                            createdAt: n,
                                             interest: 'firehose-notifications',
                                             title: 'twitter',
                                             data: {
