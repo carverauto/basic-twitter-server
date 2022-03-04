@@ -261,7 +261,9 @@ function streamConnect(retryAttempt) {
                                             }
                                         }
                                         console.log(myData)
+                                        console.log('Before post')
                                         axios.post('https://us-central1-chaseapp-8459b.cloudfunctions.net/UpdateNotifications', myData).then((res) => {
+                                            console.log('Posting to UpdateNotifications')
                                             if (res.status === '200') {
                                                 console.log('Success')
                                             }
