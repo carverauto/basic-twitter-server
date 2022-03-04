@@ -251,7 +251,6 @@ function streamConnect(retryAttempt) {
                                         console.log('Just published:', publishResponse.publishId);
                                         const myData = {
                                             body: "New tweet received from " + res.data.includes.users[0].username,
-                                            createdAt: Date.now(),
                                             interest: 'firehose-notifications',
                                             title: 'twitter',
                                             data: {
@@ -259,10 +258,15 @@ function streamConnect(retryAttempt) {
                                                 image: imageURL,
                                             }
                                         }
+                                        console.log(myData)
+                                        console.log('Before post')
                                         axios.post('https://us-central1-chaseapp-8459b.cloudfunctions.net/UpdateNotifications', myData).then((res) => {
+                                            console.log('Posting to UpdateNotifications')
                                             if (res.status === '200') {
                                                 console.log('Success')
                                             }
+                                        }).catch((e) => {
+                                            console.error(e)
                                         })
                                     }).catch((error) => {
                                         console.log('Error:', error);
@@ -308,7 +312,7 @@ function streamConnect(retryAttempt) {
             console.log('Stream has terminated, exiting..: ' + err.message)
             process.exit(0)
         }
-        process.exit(0)
+        // process.exit(0)
     }).on('timeout', (err) => {
         console.log('A timeout occurred, exiting..')
         if (err) {
