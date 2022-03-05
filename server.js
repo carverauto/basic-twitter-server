@@ -250,6 +250,7 @@ function streamConnect(retryAttempt) {
                                     }).then((publishResponse) => {
                                         console.log('Just published:', publishResponse.publishId);
                                         const myData = {
+                                            id: null,
                                             body: "New tweet received from " + res.data.includes.users[0].username,
                                             interest: 'firehose-notifications',
                                             title: 'twitter',
