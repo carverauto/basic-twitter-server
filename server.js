@@ -252,6 +252,7 @@ function streamConnect(retryAttempt) {
                                         const myData = {
                                             id: null,
                                             body: "New tweet received from " + res.data.includes.users[0].username,
+                                            type: "twitter",
                                             interest: 'firehose-notifications',
                                             title: 'twitter',
                                             data: {
