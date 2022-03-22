@@ -257,8 +257,10 @@ function streamConnect(retryAttempt) {
                                             interest: 'firehose-notifications',
                                             title: 'twitter',
                                             data: {
-                                                tweet_id: json.data.id,
-                                                image: imageURL,
+                                                tweetData: {
+                                                    tweet_id: json.data.id,
+                                                    image: imageURL,
+                                                }
                                             }
                                         }
                                         console.log(myData)
