@@ -72,6 +72,14 @@ const streamURL = 'https://api.twitter.com/2/tweets/search/stream'
 // Edit rules as desired below
 const rules = [
     {
+        'value': 'from:PupScanLA "live pursuit" has:links -is:retweet',
+        'tag': 'PupScanLA'
+    },
+    {
+        'value': 'from:SGVScanner "pursuit" has:links -is:retweet',
+        'tag': 'SGVScanner'
+    },
+    {
         'value': 'from:PCALive "WE HAVE A POLICE CHASE!" has:links -is:retweet',
         'tag': 'PCAlive'
     },
